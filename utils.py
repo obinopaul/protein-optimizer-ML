@@ -3,12 +3,83 @@ import sys
 import json
 import pickle
 import random
-
+import pandas as pd         # data analysis library for handling structured data
+import numpy as np          # mathematical library for working with numerical data
 import torch
 from tqdm import tqdm
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 import matplotlib.pyplot as plt
 
+
+
+scale_cols = ['output_WCW_gl', 'output_agitation', 'output_air_%', 'output_D0_%', 'output_gasflow', 'output_O2', 'output_Ph', 
+              'output_feed_%', 'output_feed', 'output_Temp', 'output_glycerol_gl', 
+              'output_glucose_gl', 'output_acetate_mmol_l', 'output_phosphate_mmol_l']
+    
+def scale_and_concat(X, columns_to_transform = scale_cols, train = False, scaler = None):
+    """
+    Scales selected columns in a DataFrame using StandardScaler and concatenates them with the rest of the DataFrame.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the data.
+        columns_to_transform (list): List of column names to be scaled.
+
+    Returns:
+        pandas.DataFrame: The concatenated DataFrame with scaled columns.
+    """
+    
+    # Filter out columns in 'columns_to_transform' that are not present in 'X'
+    valid_columns = [col for col in columns_to_transform if col in X.columns]
+    
+    if train == True:
+        # scaler = MinMaxScaler() # Initialize the scaler 
+        scaler = StandardScaler()   # Initialize the scaler
+        scaler.fit(X[valid_columns])  # Fit only on the training set
+    else:
+        scaler = scaler
+
+    # Create a copy of the original DataFrame
+    df_concatenated = X.copy()
+
+    # Scale the selected columns
+    scaled_columns = scaler.transform(X[valid_columns])
+
+    # Create a DataFrame with the scaled columns
+    df_scaled = pd.DataFrame(scaled_columns, columns=valid_columns, index=X.index)
+            
+    # Concatenate the scaled columns with the rest of the DataFrame
+    df_concatenated = pd.concat([df_concatenated.drop(columns=valid_columns, axis = 1), df_scaled], axis=1)
+
+    if train == True:
+        return df_concatenated, scaler
+    else:
+        return df_concatenated
+    
+    
+def add_cyclical_time_features(df, time_column, cycle_period):
+    """
+    Adds cyclical time features to a DataFrame based on a specified time column and cycle period.
+
+    Parameters:
+    - df (pd.DataFrame): The DataFrame containing the time column.
+    - time_column (str): The name of the column in df that contains time values.
+    - cycle_period (float): The period of the cycle in the same units as the time column (e.g., 48 hours).
+
+    Returns:
+    - pd.DataFrame: A DataFrame with two new columns appended, representing the sine and cosine transformations of the time column.
+    """
+    
+    # Ensure the time column exists in the DataFrame
+    if time_column not in df.columns:
+        raise ValueError(f"The specified time column '{time_column}' does not exist in the DataFrame.")
+
+    # Apply sine and cosine transformations
+    df[f'{time_column}_sin'] = np.sin(2 * np.pi * df[time_column] / cycle_period)
+    df[f'{time_column}_cos'] = np.cos(2 * np.pi * df[time_column] / cycle_period)
+    df.drop(columns = time_column, inplace=True)
+
+    return df
 
 def read_split_data(root: str, val_rate: float = 0.2):
     random.seed(0)  # 保证随机结果可复现
