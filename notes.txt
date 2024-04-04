@@ -1,0 +1,32 @@
+I have a new machine learning appraoch that i want you to write code for. I have a target variable (y) and features xi to xn.  y1 is the target variable at time 1, x1 is the target variable at time 2 etc. 
+
+I want to build a very complex ML approach where y1 which is a target variable for features xi to xn can be used to predict y2 which is also a target variable for features xi to xn and so on up till y20 or so. for each (xi to xn) belonging to y1, it can also be used to predict the next (xi to  xn) belonging to y2 and so on uptill the last y (yn). Here is an illustration. Derive a complex machine learning framework/code for this. The idea is to use this for imputation, where whenever there is a missing y, we can imput this using the y(t-1) and the (xi-xn)t-1 etc.
+
+
+y1 -->     y2 -->       y3 -->         y4 -->       y5 -->      y6 -->       y7 -->        y8 
+ |           |            |              |           |            |            |            |
+(xi -xn) -->(xi -xn) --> (xi -xn) --> (xi -xn) --> (xi -xn) --> (xi -xn) --> (xi -xn) -->  (xi -xn)
+
+
+
+
+After building the algorithm, then create 5 dummy datasets of features and labels. say 10 features and one label. 10 rows. Make sure that the labels are missing values except the last one yt (at time t=tn). let the value of the last target variable be 0.1 (that is yt = 0.1). This should be a timeseries dataset. Then concatenate all 5 dummy datasets to make 50 rows. hence we will then have only 5 vlues of y, and 45 missing values. Use the complext algorithm developed above to perform missing value imputation for all other y, using both feeatures (xi to xn) and the yt.
+
+
+
+
+
+
+
+
+
+
+
+I am not entirely sure you understand this project. 
+Imagine i have 10 datasets, of 10 features and 1 label, with 10 rows. For each dataset, all the features have a value, but only one label has a value with the others NaN. When you concatenate all tem dataset we now have 100 rows, but the labels are only 10 filled while 90 are NaN. I could perform a numerical imputation using mean but this would be innacurate since the dataset is a timeserires and each individual dataset that was concatenated is a batch of the experiment from time 0-48hrs, which means that each batch has a different interpretation.
+
+This is the reason i aim to develop a new cutting edge algorithm where we can predict the missing y from the previous y (at time t-1) plus its features. then we do this for each of the target y variable. We would then have a complex architecture/algorithm where each missing value can be inputed using the model that sees all previous target outcomes and features.
+
+
+
+
